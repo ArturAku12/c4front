@@ -14,14 +14,11 @@ function App(){
     const [theElement,setElement] = useState(null)
     const [theLRMode,setLRMode] = useState(false)
     const [pos] = usePopupPos(theElement,theLRMode)
-    const [focusButtonIndex, setFocusIndex] = useState()
-    const reference = useRef(null)
+    const [focusButtonIndex, setFocusIndex] = useState() //changes upon button clicks, 0 sets it to the first entry
+    const reference = useRef(null) //creation of the reference
     
-    //Refs for the buttons in the dropdown
-    const allTheRefs = {}
-    
+    //List of Options and sets the current option
     const [listOfOptions, setOptions] = useState(["Mary", "John", "Alex", "Marie", "Jonathan", "Babel", "Hanna", "Joseph", "Ivan", "Gregory", "Ioseph", "Papadopoulos"])
-
     const[currentOption, setCurrentOption] = useState("")
 
     //Values in the entryField of the input.
@@ -30,7 +27,7 @@ function App(){
     //Boolean to show/hide the dropdown. (TRUE = DROPDOWN IS HIDDEN, FALSE = DROPDOWN IS SHOWN)
     const[dropState, setDropState] = useState(true)
 
-    //Handle change for input field
+    //Handle change for input field, opens dropdown when something is written inside, keeps the dropdown open if the text is deleted
     const handleChange = (event) => {
         setEntryField(event.target.value);
         if (event.target.value !== "") 
@@ -72,11 +69,8 @@ function App(){
             case "Enter": 
                 if (event.target.id === "arrowbutton" || event.target.id === "input") {
                     setDropState(!dropState);
-                    setCurrentOption(reference.current.value);
-                    if (event.target.id === "input") {
-                    }
                 } else {
-                setCurrentOption(reference.current.value)
+                setCurrentOption(reference.current.value) //Sets the chosen button as the value, resets the input, focus and input field.
                 setDropState(true)
                 setEntryField("");
                 setFocusIndex(null);
@@ -84,12 +78,12 @@ function App(){
                 break;
             case "ArrowUp":
                 if (event.target.id == "input" || event.target.id == "arrowbutton") {
-                    console.log("ignore")
+                    console.log("ignore") //scenario if the ArrowUp is pressed in input/arrowbutton.
                 } else {
-                    if (focusButtonIndex - 1 == -1) {
+                    if (focusButtonIndex - 1 == -1) { //if ArrowUp is pressed at the first entry, it switches to the bottom
                         reference.current.style.backgroundColor = "white"
                         setFocusIndex(checkList().length - 1)
-                    } else {
+                    } else { //Goes up by one
                         reference.current.style.backgroundColor = "white"
                         setFocusIndex(focusButtonIndex - 1); 
                     }
@@ -97,16 +91,16 @@ function App(){
                 event.preventDefault()
                 break;
             case "ArrowDown":
-                if (event.target.id == "input" || event.target.id == "arrowbutton") {
+                if (event.target.id == "input" || event.target.id == "arrowbutton") { //Drops the dropdown when ArrowDown is pressed in the input field
                     setDropState(false)
                     setFocusIndex(0)
                 }
-                if (focusButtonIndex + 1 > checkList().length) {
+                if (focusButtonIndex + 1 > checkList().length) { //handles the case if the end of the list of options is reached
                     setFocusIndex(0)
-                } else if (focusButtonIndex == null) {
+                } else if (focusButtonIndex == null) { //handles the null situation
                     setFocusIndex(0)
                 } 
-                else {
+                else { //changes the previous focus to white, goes down by one
                     if (reference.current !== null) {
                             reference.current.style.backgroundColor = "white"
                         }
@@ -114,14 +108,14 @@ function App(){
                 }
                 event.preventDefault();
                 break;
-            case "Escape":
+            case "Escape": //escapes the popup window
                 setDropState(true);
                 event.preventDefault();
                 break;  
         }
     }
 
-    useEffect(() => { 
+    useEffect(() => { //if focusButtonIndex is changed, focuses on the button with the ref = {reference}, changes the backgroundColor
         if (reference.current !== null) {
             reference.current.focus()
             reference.current.style.backgroundColor = "#149688"
@@ -178,8 +172,9 @@ function App(){
                             {/* creates the overflow menu */}
                             <div style = {{overflow:"auto", maxHeight: "200px",}}>
                             {checkList().map((searched_option: any, key: any) =>
-                                (key === focusButtonIndex)
+                                (key === focusButtonIndex) //checks if the key is equal to the focusButtonIndex, which changes to change focus
                                 ? 
+                                // button/entry with the reference based on the 
                                 <div key = {key}>
                                     <button 
                                     ref = {reference}
