@@ -67,6 +67,7 @@ function App(){
         const typeKeyPress = event.key
         switch (typeKeyPress) {
             case "Enter": 
+            console.log(reference.current == document.activeElement)
                 if (event.target.id === "arrowbutton" || event.target.id === "input") {
                     setDropState(!dropState);
                 } else {
@@ -174,9 +175,9 @@ function App(){
                             {checkList().map((searched_option: any, key: any) =>
                                 (key === focusButtonIndex) //checks if the key is equal to the focusButtonIndex, which changes to change focus
                                 ? 
-                                // button/entry with the reference based on the 
-                                <div key = {key}>
-                                    <button 
+                                // button/entry with the reference based on the input 
+                                    <button
+                                    key = {key} 
                                     ref = {reference}
                                     id = {key}
                                     style = {{width: "100%", borderRadius: "0px",}} 
@@ -185,18 +186,16 @@ function App(){
                                     onMouseOut = {(event) => {event.target.style.background = "white"}}
                                     onClick = {(event) => {setCurrentOption(searched_option); setDropState(true); setEntryField("")}} >
                                     {searched_option} </button>
-                                </div>
                                 : 
-                                <div key = {key}>
                                     <button 
                                     id = {key}
+                                    key = {key}
                                     style = {{width: "100%", borderRadius: "0px",}} 
                                     value = {searched_option}
                                     onMouseOver = {(event) => {event.target.style.background = "#149688"; event.target.style.borderColor = "none"}}
                                     onMouseOut = {(event) => {event.target.style.background = "white"}}
                                     onClick = {(event) => {setCurrentOption(searched_option); setDropState(true); setEntryField("")}} > 
                                     {searched_option} </button>
-                                </div>
                             )}
                             </div>
                         </div>
