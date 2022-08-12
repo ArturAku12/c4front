@@ -11,11 +11,12 @@ const { createElement: $, useState, createRef } = React
 function App(){
     
     //usePopupPos set-up
-    const [theElement,setElement] = useState(null)
+    const [theElement,setElement] = useState<any>(null)
     const [theLRMode,setLRMode] = useState(false)
     const [pos] = usePopupPos(theElement,theLRMode)
-    const [focusButtonIndex, setFocusIndex] = useState() //changes upon button clicks, 0 sets it to the first entry
+    const [focusButtonIndex, setFocusIndex] = useState(0) //changes upon button clicks, 0 sets it to the first entry
     const reference = useRef(null) //creation of the reference
+    const [keyPressed, setKeyPressed] = useState()
     
     //List of Options and sets the current option
     const [listOfOptions, setOptions] = useState(["Mary", "John", "Alex", "Marie", "Jonathan", "Babel", "Hanna", "Joseph", "Ivan", "Gregory", "Ioseph", "Papadopoulos"])
@@ -28,10 +29,14 @@ function App(){
     const[dropState, setDropState] = useState(true)
 
     //Handle change for input field, opens dropdown when something is written inside, keeps the dropdown open if the text is deleted
-    const handleChange = (event) => {
+    const handleChange = (event:any) => {
         setEntryField(event.target.value);
-        if (event.target.value !== "") 
-            {setDropState(false)}
+        if (checkList().length == 0) //removes popup if there are no matches in the list
+            {setDropState(true)}
+        else if (event.target.value !== "") 
+        {
+            setDropState(false)
+        }
     }
 
     //Creates a list of names based on the input in the entryField.
@@ -44,7 +49,7 @@ function App(){
             if (listOfOptions[i].toLowerCase().includes(entryField.toLowerCase())) {
                 array.push(listOfOptions[i])
             };
-        }        
+        }     
         return array
     }
 
@@ -65,27 +70,28 @@ function App(){
     // Up and Down navigate the entries in the menu. Can also navigate with Tab.
     const keyPress = (event: any) => {
         const typeKeyPress = event.key
+        setKeyPressed(typeKeyPress)
         switch (typeKeyPress) {
             case "Enter": 
-            console.log(reference.current == document.activeElement)
                 if (event.target.id === "arrowbutton" || event.target.id === "input") {
                     setDropState(!dropState);
                 } else {
+                if (reference !== null) {
                 setCurrentOption(reference.current.value) //Sets the chosen button as the value, resets the input, focus and input field.
+                }
                 setDropState(true)
                 setEntryField("");
-                setFocusIndex(null);
+                setFocusIndex(0);
                 }
+                event.preventDefault();
                 break;
             case "ArrowUp":
                 if (event.target.id == "input" || event.target.id == "arrowbutton") {
-                    console.log("ignore") //scenario if the ArrowUp is pressed in input/arrowbutton.
+                    //scenario if the ArrowUp is pressed in input/arrowbutton.
                 } else {
                     if (focusButtonIndex - 1 == -1) { //if ArrowUp is pressed at the first entry, it switches to the bottom
-                        reference.current.style.backgroundColor = "white"
                         setFocusIndex(checkList().length - 1)
-                    } else { //Goes up by one
-                        reference.current.style.backgroundColor = "white"
+                    } else { //Switches the button up by one
                         setFocusIndex(focusButtonIndex - 1); 
                     }
                 }
@@ -96,32 +102,44 @@ function App(){
                     setDropState(false)
                     setFocusIndex(0)
                 }
-                if (focusButtonIndex + 1 > checkList().length) { //handles the case if the end of the list of options is reached
+                if (focusButtonIndex + 2 > checkList().length) { //handles the case if the end of the list of options is reached
                     setFocusIndex(0)
-                } else if (focusButtonIndex == null) { //handles the null situation
-                    setFocusIndex(0)
-                } 
-                else { //changes the previous focus to white, goes down by one
-                    if (reference.current !== null) {
-                            reference.current.style.backgroundColor = "white"
-                        }
-                    setFocusIndex(focusButtonIndex + 1);
+                } else { //changes the previous focus to white, goes down by one
+                    
+                    if (reference.current == null && entryField == "" && focusButtonIndex == 0) {
+                        setFocusIndex(0)
+                    } else if ((document.activeElement.id == "input" || document.activeElement.id == "arrowbutton") && entryField !== "") {
+                        setFocusIndex(0)
+                    } else {
+                        setFocusIndex(focusButtonIndex + 1)
+                    }
                 }
                 event.preventDefault();
                 break;
             case "Escape": //escapes the popup window
+                setFocusIndex(0);
                 setDropState(true);
                 event.preventDefault();
                 break;  
         }
     }
 
-    useEffect(() => { //if focusButtonIndex is changed, focuses on the button with the ref = {reference}, changes the backgroundColor
+    useEffect((event) => { //if focusButtonIndex is changed, focuses on the button with the ref = {reference}, changes the backgroundColor 
+        console.log(checkList().length == 0)
         if (reference.current !== null) {
-            reference.current.focus()
-            reference.current.style.backgroundColor = "#149688"
+            if (document.activeElement.id == "input" && keyPressed == "ArrowDown") {
+                setTimeout(() => {
+                    reference.current.focus()})
+            } else if (document.activeElement.id == "input") {
+
+            } else if (document.activeElement.id == "arrowbutton") {
+                setTimeout(() => {
+                    reference.current.focus()})
+            } else {
+                reference.current.focus()  
+            }
         }
-    }, [focusButtonIndex])
+    }, [focusButtonIndex, dropState, keyPressed])
 
     return(
         
@@ -145,7 +163,7 @@ function App(){
             
             
             {/* arrow button */}
-            <button type = "button" className="buttonEl"
+            <button id="arrowbutton" type = "button" className="buttonEl"
                     style={{
                         transform: dropState ? "rotate(180deg)" : 'rotate(0deg)',
                         width: "20%",
@@ -155,13 +173,13 @@ function App(){
                         border: "none",
                         resize: "none",
                     }}
-                    onClick={(event) => setDropState(!dropState)}>
+                    onClick={(event) => {setFocusIndex(0); setDropState(!dropState);}}>
                 <img style={{ transform: 'rotate(180deg)', height: "10px", display: "block", textAlign: "center", marginLeft: "-5px" }} src = {arrowdown} alt="arrowdown"/>
             </button>
             
             </div>
 
-                { dropState
+                { (dropState && (checkList().length == 0))
                     ?
                     null
                     :
@@ -173,28 +191,14 @@ function App(){
                             {/* creates the overflow menu */}
                             <div style = {{overflow:"auto", maxHeight: "200px",}}>
                             {checkList().map((searched_option: any, key: any) =>
-                                (key === focusButtonIndex) //checks if the key is equal to the focusButtonIndex, which changes to change focus
-                                ? 
                                 // button/entry with the reference based on the input 
                                     <button
                                     key = {key} 
-                                    ref = {reference}
+                                    ref = {key === focusButtonIndex ? reference : null}
                                     id = {key}
-                                    style = {{width: "100%", borderRadius: "0px",}} 
+                                    style = {{width: "100%", borderRadius: "0px", }} 
                                     value = {searched_option}
-                                    onMouseOver = {(event) => {event.target.style.background = "#149688"; event.target.style.borderColor = "none"}}
-                                    onMouseOut = {(event) => {event.target.style.background = "white"}}
-                                    onClick = {(event) => {setCurrentOption(searched_option); setDropState(true); setEntryField("")}} >
-                                    {searched_option} </button>
-                                : 
-                                    <button 
-                                    id = {key}
-                                    key = {key}
-                                    style = {{width: "100%", borderRadius: "0px",}} 
-                                    value = {searched_option}
-                                    onMouseOver = {(event) => {event.target.style.background = "#149688"; event.target.style.borderColor = "none"}}
-                                    onMouseOut = {(event) => {event.target.style.background = "white"}}
-                                    onClick = {(event) => {setCurrentOption(searched_option); setDropState(true); setEntryField("")}} > 
+                                    onClick = {() => {setCurrentOption(searched_option); setDropState(true); setEntryField("")}} >
                                     {searched_option} </button>
                             )}
                             </div>
