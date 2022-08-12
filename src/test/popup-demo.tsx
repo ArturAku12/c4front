@@ -31,12 +31,8 @@ function App(){
     //Handle change for input field, opens dropdown when something is written inside, keeps the dropdown open if the text is deleted
     const handleChange = (event:any) => {
         setEntryField(event.target.value);
-        if (checkList().length == 0) //removes popup if there are no matches in the list
-            {setDropState(true)}
-        else if (event.target.value !== "") 
-        {
-            setDropState(false)
-        }
+        if (event.target.value !== "") 
+            {setDropState(false)}
     }
 
     //Creates a list of names based on the input in the entryField.
@@ -125,7 +121,7 @@ function App(){
     }
 
     useEffect((event) => { //if focusButtonIndex is changed, focuses on the button with the ref = {reference}, changes the backgroundColor 
-        console.log(checkList().length == 0)
+        console.log(checkList().length)
         if (reference.current !== null) {
             if (document.activeElement.id == "input" && keyPressed == "ArrowDown") {
                 setTimeout(() => {
@@ -179,7 +175,7 @@ function App(){
             
             </div>
 
-                { (dropState && (checkList().length == 0))
+                { dropState 
                     ?
                     null
                     :
