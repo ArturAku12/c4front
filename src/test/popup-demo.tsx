@@ -134,7 +134,7 @@ function App(){
         }
     }, [focusButtonIndex, dropState, keyPressed])
 
-    useEffect(() => { //if no options in checkList() the popup closes, otherwise, it stays open
+    useEffect(() => { //if no options in checkList() the popup closes. Likewise, it stays closed if entryField is empty. 
        if ( checkList().length == 0) {
         setDropState(true)
        } else if (entryField !== "") {
