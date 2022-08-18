@@ -16,7 +16,7 @@ function App(){
     const [pos] = usePopupPos(theElement,theLRMode)
     const [focusButtonIndex, setFocusIndex] = useState(0) //changes upon button clicks, 0 sets it to the first entry
     const reference = useRef(null) //creation of the reference
-    const [keyPressed, setKeyPressed] = useState()
+    const [goDownPlease, setGoDownPlease] = useState(false)
     
     //List of Options and sets the current option
     const [listOfOptions, setOptions] = useState(["Mary", "John", "Alex", "Marie", "Jonathan", "Babel", "Hanna", "Joseph", "Ivan", "Gregory", "Ioseph", "Papadopoulos"])
@@ -30,6 +30,7 @@ function App(){
 
     //Handle change for input field, opens dropdown when something is written inside, keeps the dropdown open if the text is deleted
     const handleChange = (event:any) => {
+        console.log(goDownPlease)
         setEntryField(event.target.value);
     }
 
@@ -64,7 +65,6 @@ function App(){
     // Up and Down navigate the entries in the menu. Can also navigate with Tab.
     const keyPress = (event: any) => {
         const typeKeyPress = event.key
-        setKeyPressed(typeKeyPress)
         switch (typeKeyPress) {
             case "Enter": 
                 if (event.target.id === "arrowbutton" || event.target.id === "input") {
@@ -76,6 +76,7 @@ function App(){
                 setDropState(true)
                 setEntryField("");
                 setFocusIndex(0);
+                setGoDownPlease(false)
                 }
                 event.preventDefault();
                 break;
@@ -95,6 +96,7 @@ function App(){
                 if (event.target.id == "input" || event.target.id == "arrowbutton") { //Drops the dropdown when ArrowDown is pressed in the input field
                     setDropState(false)
                     setFocusIndex(0)
+                    setGoDownPlease(true)
                 }
                 if (focusButtonIndex + 2 > checkList().length) { //handles the case if the end of the list of options is reached
                     setFocusIndex(0)
@@ -120,7 +122,7 @@ function App(){
 
     useEffect(() => { //if focusButtonIndex is changed, focuses on the button with the ref = {reference}, changes the backgroundColor 
         if (reference.current !== null) {
-            if (document.activeElement.id == "input" && keyPressed == "ArrowDown") {
+            if (document.activeElement.id == "input" && goDownPlease) {
                 setTimeout(() => {
                     reference.current.focus()})
             } else if (document.activeElement.id == "input") {
@@ -132,7 +134,7 @@ function App(){
                 reference.current.focus()  
             }
         }
-    }, [focusButtonIndex, dropState, keyPressed])
+    }, [focusButtonIndex, dropState, entryField, goDownPlease])
 
     useEffect(() => { //if no options in checkList() the popup closes. Likewise, it stays closed if entryField is empty. 
        if ( checkList().length == 0) {
