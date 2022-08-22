@@ -1,15 +1,16 @@
 // @ts-nocheck
 import {usePopupPos} from "../main/popup.js"
 import "./popup-demo.scss"
-
+import { Patch, PatchHeaders, useInputSync } from '../extra/input-sync';
 import ReactDOM from "react-dom"
-import React, { useRef, useEffect } from "react"
+import React, { useRef, useEffect, createElement, useContext, createContext } from "react"
+import { createSyncProviders } from "../main/vdom-hooks";
 import arrowdown from './arrowdown.svg'
 
 const { createElement: $, useState, createRef } = React
 
 function App(){
-    
+
     //usePopupPos set-up
     const [theElement,setElement] = useState<any>(null)
     const [theLRMode,setLRMode] = useState(false)
@@ -28,10 +29,34 @@ function App(){
     //Boolean to show/hide the dropdown. (TRUE = DROPDOWN IS HIDDEN, FALSE = DROPDOWN IS SHOWN)
     const[dropState, setDropState] = useState(true)
 
+    const state = {input: currentOption, dropState: dropState, entryField: entryField }
+    const {
+		currentState, 
+		setTempState, 
+		setFinalState 
+	} = useInputSync({parent: "test"}, 'receiver', state, false, patchToState, s => s, stateToPatch);
+
+    function stateToPatch({inputValue, mode, popupOpen}: DropdownState): Patch {
+        const headers = {
+            currentOption: currentOption,
+            dropState: dropState
+        };
+        return { value: inputValue, headers };
+    }
+    
+    function patchToState(patch: Patch): DropdownState {
+        const headers = patch.headers as PatchHeaders;
+        return {
+            inputValue: patch.value,
+            mode: headers['x-r-mode'] as Mode,
+            popupOpen: !!headers['x-r-popupOpen']
+        };
+    }
+    
     //Handle change for input field, opens dropdown when something is written inside, keeps the dropdown open if the text is deleted
     const handleChange = (event:any) => {
-        console.log(goDownPlease)
         setEntryField(event.target.value);
+        setTempState({ inputValue: event.target.value, currentOption: currentOption, popupOpen: dropState })
     }
 
     //Creates a list of names based on the input in the entryField.
@@ -71,7 +96,8 @@ function App(){
                     setDropState(!dropState);
                 } else {
                 if (reference !== null) {
-                setCurrentOption(reference.current.value) //Sets the chosen button as the value, resets the input, focus and input field.
+                setCurrentOption(reference.current.value)
+                setTempState({ inputValue: event.target.value, currentOption: currentOption, popupOpen: dropState }) //Sets the chosen button as the value, resets the input, focus and input field.
                 }
                 setDropState(true)
                 setEntryField("");
@@ -144,8 +170,9 @@ function App(){
        }
     }, [entryField])
 
-    return(
-        
+    const randomCode = () => {
+        return(
+    
         <div onKeyDown={(event) => keyPress(event)}  onBlur={(event) => {handleBlur(event)}}>
 
             <div key="parent" style={{ border: "3px solid green" }}>
@@ -176,7 +203,7 @@ function App(){
                         border: "none",
                         resize: "none",
                     }}
-                    onClick={(event) => {setFocusIndex(0); setDropState(!dropState);}}>
+                    onClick={(event) => {setFocusIndex(0); setDropState(!dropState); setFinalState({ ...currentState, popupOpen: !popupOpen })}}>
                 <img style={{ transform: 'rotate(180deg)', height: "10px", display: "block", textAlign: "center", marginLeft: "-5px" }} src = {arrowdown} alt="arrowdown"/>
             </button>
             
@@ -211,8 +238,15 @@ function App(){
         </div>
         
         
-    )
+        )
+    }
 
+    const sender = {
+        enqueue: (identity: any, patch: any) => console.log(patch)
+    };
+    const ack: boolean | null = null;
+
+    return createSyncProviders({sender, ack, children: randomCode()});
 }
 
 const containerElement = document.createElement("div")
