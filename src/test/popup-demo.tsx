@@ -46,9 +46,10 @@ function App(){
     
     function patchToState(patch: Patch): DropdownState {
         const headers = patch.headers as PatchHeaders;
+        console.log(patch)
         return {
             inputValue: patch.value,
-            mode: headers['x-r-mode'] as Mode,
+            currentOption: headers.currentOption as Mode,
             popupOpen: !!headers['x-r-popupOpen']
         };
     }
@@ -56,6 +57,7 @@ function App(){
     //Handle change for input field, opens dropdown when something is written inside, keeps the dropdown open if the text is deleted
     const handleChange = (event:any) => {
         setEntryField(event.target.value);
+        console.log(dropState)
         setTempState({ inputValue: event.target.value, currentOption: currentOption, popupOpen: dropState })
     }
 
@@ -203,7 +205,7 @@ function App(){
                         border: "none",
                         resize: "none",
                     }}
-                    onClick={(event) => {setFocusIndex(0); setDropState(!dropState); setFinalState({ ...currentState, popupOpen: !popupOpen })}}>
+                    onClick={(event) => {setFocusIndex(0); setDropState(!dropState); setFinalState({ inputValue: "", currentOption: currentOption, popupOpen: dropState })}}>
                 <img style={{ transform: 'rotate(180deg)', height: "10px", display: "block", textAlign: "center", marginLeft: "-5px" }} src = {arrowdown} alt="arrowdown"/>
             </button>
             
@@ -228,7 +230,7 @@ function App(){
                                     id = {key}
                                     style = {{width: "100%", borderRadius: "0px", }} 
                                     value = {searched_option}
-                                    onClick = {() => {setCurrentOption(searched_option); setDropState(true); setEntryField("")}} >
+                                    onClick = {() => {setTempState({ inputValue: "", currentOption: currentOption, popupOpen: dropState }); setCurrentOption(searched_option); setDropState(true); setEntryField("")}} >
                                     {searched_option} </button>
                             )}
                             </div>
