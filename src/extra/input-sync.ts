@@ -57,6 +57,7 @@ function useInputSync<ServerState, State>(
     const [patches, enqueuePatch] = <[SendPatch[], (patch: SendPatch) => void]>useSync(receiverId(receiverName)(identity))
     const patch: SendPatch = patches.slice(-1)[0]
     const currentState: State = patch ? patchToState(patch) : serverToState(serverState)
+    console.log("Now we are in input-sync")
     const onChange = useCallback((state: State) => enqueuePatch(stateToSendPatch(stateToPatch(state), true, deferredSend)), [enqueuePatch])
     const onBlur = useCallback((state: State) => enqueuePatch(stateToSendPatch(stateToPatch(state), false, false)), [enqueuePatch])
     return {currentState: currentState, setTempState: onChange, setFinalState: onBlur}

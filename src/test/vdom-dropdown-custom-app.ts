@@ -4,6 +4,7 @@ import { createSyncProviders } from "../main/vdom-hooks";
 import { DropdownCustom } from "../extra/dropdown-custom";
 
 function App() {
+    console.log("Here we are in vdom-dropdown-custom-app")
     const child1 = $(DropdownCustom, {
         key: "TEST1",
         identity: {parent: "test"},
@@ -50,7 +51,7 @@ function App() {
         enqueue: (identity: any, patch: any) => console.log(patch)
     };
     const ack: boolean | null = null;
-
+    console.log("And we are basically finished with vdom-dropdown-custom-app")
     return createSyncProviders({sender, ack, children: [child1, child2]});
 }
 

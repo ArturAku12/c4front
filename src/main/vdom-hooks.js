@@ -10,9 +10,11 @@ const nonMerged = ack => aPatch => !(aPatch && ack && aPatch.sentIndex <= ack.in
 export const useSender = () => useContext(SenderContext)
 export const useSync = identity => {
     const [patches,setPatches] = useState([])
+    //const sender = useSender()
     const sender = {
         enqueue: (identity, patch) => console.log(patch)
     };
+    console.log("And this is the result of the sender initialization in vdom hooks", sender)
     const enqueuePatch = useCallback(({onAck,...aPatch})=>{
         setPatches(aPatches=>[...aPatches,{onAck, ...aPatch, sentIndex: sender.enqueue(identity,aPatch)}])
     },[sender,identity])

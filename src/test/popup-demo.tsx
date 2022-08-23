@@ -28,14 +28,14 @@ function App(){
 
     //Boolean to show/hide the dropdown. (TRUE = DROPDOWN IS HIDDEN, FALSE = DROPDOWN IS SHOWN)
     const[dropState, setDropState] = useState(true)
-
+    console.log("First, we start here in popup-demo")
     const state = {input: currentOption, dropState: dropState, entryField: entryField }
     const {
 		currentState, 
 		setTempState, 
 		setFinalState 
 	} = useInputSync({parent: "test"}, 'receiver', state, false, patchToState, s => s, stateToPatch);
-
+    console.log("And now we are back to popup-demo")
     function stateToPatch({inputValue, mode, popupOpen}: DropdownState): Patch {
         const headers = {
             currentOption: currentOption,
