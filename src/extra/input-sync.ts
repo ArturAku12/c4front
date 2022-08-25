@@ -54,7 +54,6 @@ function useInputSync<ServerState, State>(
     serverToState: (s: ServerState) => State,
     stateToPatch: (s: State) => Patch
 ): SyncState<State> {
-    console.log("Now we are in input-sync")
     const [patches, enqueuePatch] = <[SendPatch[], (patch: SendPatch) => void]>useSync(receiverId(receiverName)(identity))
     const patch: SendPatch = patches.slice(-1)[0]
     const currentState: State = patch ? patchToState(patch) : serverToState(serverState)

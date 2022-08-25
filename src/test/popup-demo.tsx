@@ -9,8 +9,7 @@ import arrowdown from './arrowdown.svg'
 
 const { createElement: $, useState, createRef } = React
 
-function App(){
-
+export function Dropdown({listOfOptions, theState}){
     //usePopupPos set-up
     const [theElement,setElement] = useState<any>(null)
     const [theLRMode,setLRMode] = useState(false)
@@ -20,25 +19,24 @@ function App(){
     const [goDownPlease, setGoDownPlease] = useState(false)
     
     //List of Options and sets the current option
-    const [listOfOptions, setOptions] = useState(["Mary", "John", "Alex", "Marie", "Jonathan", "Babel", "Hanna", "Joseph", "Ivan", "Gregory", "Ioseph", "Papadopoulos"])
-    const[currentOption, setCurrentOption] = useState("")
+    //const[currentOption, setCurrentOption] = useState("")
 
     //Values in the entryField of the input.
     const [entryField, setEntryField] = useState("")
 
     //Boolean to show/hide the dropdown. (TRUE = DROPDOWN IS HIDDEN, FALSE = DROPDOWN IS SHOWN)
-    const[dropState, setDropState] = useState(true)
-    console.log("First, we start here in popup-demo")
-    const state = {input: currentOption, dropState: dropState, entryField: entryField }
+    // const[dropState, setDropState] = useState(true)
+    // const state = {input: currentOption, dropState: dropState, entryField: entryField }
     const {
 		currentState, 
 		setTempState, 
 		setFinalState 
-	} = useInputSync({parent: "test"}, 'receiver', state, false, patchToState, s => s, stateToPatch);
-    console.log("And now we are back to popup-demo")
-    function stateToPatch({inputValue, mode, popupOpen}: DropdownState): Patch {
+	} = useInputSync({parent: "test"}, 'receiver', theState, false, patchToState, s => s, stateToPatch);
+
+    const { inputValue, currentOption, dropState } = currentState;
+    function stateToPatch({ inputValue, currentOption, dropState }: DropdownState): Patch {
         const headers = {
-            currentOption: currentOption,
+            currentOption: currentOption, 
             dropState: dropState
         };
         return { value: inputValue, headers };
@@ -48,15 +46,16 @@ function App(){
         const headers = patch.headers as PatchHeaders;
         return {
             inputValue: patch.value,
-            currentOption: headers.currentOption as Mode,
-            popupOpen: !!headers['x-r-popupOpen']
+            currentOption: headers.currentOption,
+            dropState: headers.dropState
         };
     }
-    
+
     //Handle change for input field, opens dropdown when something is written inside, keeps the dropdown open if the text is deleted
     const handleChange = (event:any) => {
         setEntryField(event.target.value);
-        setTempState({ inputValue: event.target.value, currentOption: currentOption, popupOpen: dropState })
+        console.log(checkList().length); 
+        setTempState({ ...currentState, inputValue: event.target.value })
     }
 
     //Creates a list of names based on the input in the entryField.
@@ -65,12 +64,17 @@ function App(){
     //that contain the string of the entryField.
     const checkList = () => {
         let array = []; 
-        for (let i = 0; i < listOfOptions.length; i++) {
-            if (listOfOptions[i].toLowerCase().includes(entryField.toLowerCase())) {
-                array.push(listOfOptions[i])
-            };
-        }     
-        return array
+        if (currentState.inputValue !== undefined) {
+            for (let i = 0; i < listOfOptions.length; i++) {
+                if (listOfOptions[i].toLowerCase().includes(entryField.toLowerCase())) {
+                    array.push(listOfOptions[i])
+                };
+            }  
+            return array   
+        }  
+        else {
+            return listOfOptions
+        }
     }
 
     // Handles the Blur event. Blur events that occur between clicks/buttonpress inside the div are ignored.
@@ -80,7 +84,9 @@ function App(){
         requestAnimationFrame(() => {
             // Check if the new focused element is a child of the original container
             if (!currentTarget.contains(document.activeElement)) {
-              setDropState(true);
+              setFinalState({...currentState, dropState: true})
+              console.log("hiya")
+            //   setFinalState({...currentState})
             }
           });
     }
@@ -93,13 +99,11 @@ function App(){
         switch (typeKeyPress) {
             case "Enter": 
                 if (event.target.id === "arrowbutton" || event.target.id === "input") {
-                    setDropState(!dropState);
+                    setTempState({...currentState, dropState: !dropState});
                 } else {
                 if (reference !== null) {
-                setCurrentOption(reference.current.value)
-                setTempState({ inputValue: event.target.value, currentOption: currentOption, popupOpen: dropState }) //Sets the chosen button as the value, resets the input, focus and input field.
+                    setTempState({inputValue: "", currentOption: reference.current.value, dropState: true }) //Sets the chosen button as the value, resets the input, focus and input field.
                 }
-                setDropState(true)
                 setEntryField("");
                 setFocusIndex(0);
                 setGoDownPlease(false)
@@ -120,9 +124,11 @@ function App(){
                 break;
             case "ArrowDown":
                 if (event.target.id == "input" || event.target.id == "arrowbutton") { //Drops the dropdown when ArrowDown is pressed in the input field
-                    setDropState(false)
-                    setFocusIndex(0)
-                    setGoDownPlease(true)
+                    if (checkList().length > 0) {
+                        setTempState({...currentState, dropState: false})
+                        setFocusIndex(0)
+                        setGoDownPlease(true)
+                    }
                 }
                 if (focusButtonIndex + 2 > checkList().length) { //handles the case if the end of the list of options is reached
                     setFocusIndex(0)
@@ -140,7 +146,7 @@ function App(){
                 break;
             case "Escape": //escapes the popup window
                 setFocusIndex(0);
-                setDropState(true);
+                setTempState({...currentState, dropState: true})
                 event.preventDefault();
                 break;  
         }
@@ -164,17 +170,16 @@ function App(){
 
     useEffect(() => { //if no options in checkList() the popup closes. Likewise, it stays closed if entryField is empty. 
        if ( checkList().length == 0) {
-        setDropState(true)
+        setTempState({...currentState, dropState: true})
        } else if (entryField !== "") {
-        setDropState(false)
+        setTempState({...currentState, dropState: false})
        }
     }, [entryField])
 
-    const randomCode = () => {
+    //const randomCode = () => {
         return(
-    
         <div onKeyDown={(event) => keyPress(event)}  onBlur={(event) => {handleBlur(event)}}>
-
+            <h3>{currentState.inputValue}</h3>
             <div key="parent" style={{ border: "3px solid green" }}>
             {/* input field */}
             <input type="text"
@@ -203,9 +208,9 @@ function App(){
                         border: "none",
                         resize: "none",
                     }}
-                    onClick={(event) => {setFocusIndex(0); setDropState(!dropState); setFinalState({ inputValue: entryField, currentOption: currentOption, popupOpen: dropState })}}>
+                    onClick={(event) => {setFocusIndex(0); setTempState({...currentState, dropState: !dropState});}}>
                 <img style={{ transform: 'rotate(180deg)', height: "10px", display: "block", textAlign: "center", marginLeft: "-5px" }} src = {arrowdown} alt="arrowdown"/>
-            </button>
+            </button> 
             
             </div>
 
@@ -228,7 +233,7 @@ function App(){
                                     id = {key}
                                     style = {{width: "100%", borderRadius: "0px", }} 
                                     value = {searched_option}
-                                    onClick = {() => {setTempState({ inputValue: entryField, currentOption: currentOption, popupOpen: dropState }); setCurrentOption(searched_option); setDropState(true); setEntryField("")}} >
+                                    onClick = {() => { setTempState({...currentState, dropState: true, currentOption: searched_option}); setEntryField("")}} >
                                     {searched_option} </button>
                             )}
                             </div>
@@ -239,17 +244,19 @@ function App(){
         
         
         )
-    }
+    //}
 
-    const sender = {
-        enqueue: (identity: any, patch: any) => console.log(patch)
-    };
-    const ack: boolean | null = null;
+    // const sender = {
+    //     enqueue: (identity: any, patch: any) => console.log(patch)
+    // };
+    // const ack: boolean | null = null;
 
-    return createSyncProviders({sender, ack, children: randomCode()});
+    // return createSyncProviders({sender, ack, children: randomCode()});
 }
 
-const containerElement = document.createElement("div")
-containerElement.setAttribute("id", "root");
-document.body.appendChild(containerElement)
-ReactDOM.render($(App), containerElement)
+export default Dropdown
+
+// const containerElement = document.createElement("div")
+// containerElement.setAttribute("id", "root");
+// document.body.appendChild(containerElement)
+// ReactDOM.render($(App), containerElement)
