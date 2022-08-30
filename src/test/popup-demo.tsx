@@ -1,4 +1,4 @@
-// @ts-nocheck
+//// @ts-nocheck
 import {usePopupPos} from "../main/popup.js"
 import "./popup-demo.scss"
 import { Patch, PatchHeaders, useInputSync } from '../extra/input-sync';
@@ -9,20 +9,32 @@ import arrowdown from './arrowdown.svg'
 
 const { createElement: $, useState, createRef } = React
 
-export function Dropdown({listOfOptions, theState}){
+interface DropdownProps {
+    listOfOptions: string[],
+    theState: DropdownState,
+    identity: Object
+}
+
+interface DropdownState {
+	inputValue: string,
+	currentOption: string,
+	dropState: boolean | string
+}
+
+export function Dropdown({listOfOptions, theState, identity}: DropdownProps){
     //usePopupPos set-up
     const [theElement,setElement] = useState<any>(null)
     const [theLRMode,setLRMode] = useState(false)
     const [pos] = usePopupPos(theElement,theLRMode)
     const [focusButtonIndex, setFocusIndex] = useState(0) //changes upon button clicks, 0 sets it to the first entry
-    const reference = useRef(null) //creation of the reference
+    const reference = useRef<any>(null) //creation of the reference
     const [goDownPlease, setGoDownPlease] = useState(false)
     
     //List of Options and sets the current option
     //const[currentOption, setCurrentOption] = useState("")
 
     //Values in the entryField of the input.
-    const [entryField, setEntryField] = useState("")
+    //const [entryField, setEntryField] = useState("")
 
     //Boolean to show/hide the dropdown. (TRUE = DROPDOWN IS HIDDEN, FALSE = DROPDOWN IS SHOWN)
     // const[dropState, setDropState] = useState(true)
@@ -31,18 +43,21 @@ export function Dropdown({listOfOptions, theState}){
 		currentState, 
 		setTempState, 
 		setFinalState 
-	} = useInputSync({parent: "test"}, 'receiver', theState, false, patchToState, s => s, stateToPatch);
+	} = useInputSync(identity, 'receiver', theState, false, patchToState, s => s, stateToPatch);
 
     const { inputValue, currentOption, dropState } = currentState;
     function stateToPatch({ inputValue, currentOption, dropState }: DropdownState): Patch {
+        //console.log((+dropState).toString())
         const headers = {
             currentOption: currentOption, 
-            dropState: dropState
+            dropState: (+dropState).toString() //converts the boolean to a number and then to a string
         };
+        console.log(typeof headers.dropState)
         return { value: inputValue, headers };
     }
     
     function patchToState(patch: Patch): DropdownState {
+        //console.log(patch)
         const headers = patch.headers as PatchHeaders;
         return {
             inputValue: patch.value,
@@ -53,9 +68,10 @@ export function Dropdown({listOfOptions, theState}){
 
     //Handle change for input field, opens dropdown when something is written inside, keeps the dropdown open if the text is deleted
     const handleChange = (event:any) => {
-        setEntryField(event.target.value);
-        console.log(checkList().length); 
+        //setEntryField(event.target.value);
         setTempState({ ...currentState, inputValue: event.target.value })
+        // console.log(inputValue);
+        // console.log(entryField);
     }
 
     //Creates a list of names based on the input in the entryField.
@@ -66,7 +82,7 @@ export function Dropdown({listOfOptions, theState}){
         let array = []; 
         if (currentState.inputValue !== undefined) {
             for (let i = 0; i < listOfOptions.length; i++) {
-                if (listOfOptions[i].toLowerCase().includes(entryField.toLowerCase())) {
+                if (listOfOptions[i].toLowerCase().includes(inputValue.toLowerCase())) {
                     array.push(listOfOptions[i])
                 };
             }  
@@ -84,7 +100,7 @@ export function Dropdown({listOfOptions, theState}){
         requestAnimationFrame(() => {
             // Check if the new focused element is a child of the original container
             if (!currentTarget.contains(document.activeElement)) {
-              setFinalState({...currentState, dropState: true})
+              setFinalState({...currentState, dropState: "1"})
               console.log("hiya")
             //   setFinalState({...currentState})
             }
@@ -102,9 +118,9 @@ export function Dropdown({listOfOptions, theState}){
                     setTempState({...currentState, dropState: !dropState});
                 } else {
                 if (reference !== null) {
-                    setTempState({inputValue: "", currentOption: reference.current.value, dropState: true }) //Sets the chosen button as the value, resets the input, focus and input field.
+                    setTempState({inputValue: "", currentOption: reference.current!.value, dropState: "1" }) //Sets the chosen button as the value, resets the input, focus and input field.
                 }
-                setEntryField("");
+                //setEntryField("");
                 setFocusIndex(0);
                 setGoDownPlease(false)
                 }
@@ -125,7 +141,7 @@ export function Dropdown({listOfOptions, theState}){
             case "ArrowDown":
                 if (event.target.id == "input" || event.target.id == "arrowbutton") { //Drops the dropdown when ArrowDown is pressed in the input field
                     if (checkList().length > 0) {
-                        setTempState({...currentState, dropState: false})
+                        setTempState({...currentState, dropState: "0"})
                         setFocusIndex(0)
                         setGoDownPlease(true)
                     }
@@ -134,9 +150,9 @@ export function Dropdown({listOfOptions, theState}){
                     setFocusIndex(0)
                 } else { //changes the previous focus to white, goes down by one
                     
-                    if (reference.current == null && entryField == "" && focusButtonIndex == 0) {
+                    if (reference.current == null && inputValue == "" && focusButtonIndex == 0) {
                         setFocusIndex(0)
-                    } else if ((document.activeElement.id == "input" || document.activeElement.id == "arrowbutton") && entryField !== "") {
+                    } else if ((document.activeElement!.id == "input" || document.activeElement!.id == "arrowbutton") && inputValue !== "") {
                         setFocusIndex(0)
                     } else {
                         setFocusIndex(focusButtonIndex + 1)
@@ -146,7 +162,7 @@ export function Dropdown({listOfOptions, theState}){
                 break;
             case "Escape": //escapes the popup window
                 setFocusIndex(0);
-                setTempState({...currentState, dropState: true})
+                setTempState({...currentState, dropState: "1"})
                 event.preventDefault();
                 break;  
         }
@@ -154,27 +170,28 @@ export function Dropdown({listOfOptions, theState}){
 
     useEffect(() => { //if focusButtonIndex is changed, focuses on the button with the ref = {reference}, changes the backgroundColor 
         if (reference.current !== null) {
-            if (document.activeElement.id == "input" && goDownPlease) {
+            if (document.activeElement!.id == "input" && goDownPlease) {
                 setTimeout(() => {
-                    reference.current.focus()})
-            } else if (document.activeElement.id == "input") {
+                    reference.current!.focus()})
+            } else if (document.activeElement!.id == "input") {
 
-            } else if (document.activeElement.id == "arrowbutton") {
+            } else if (document.activeElement!.id == "arrowbutton") {
                 setTimeout(() => {
-                    reference.current.focus()})
+                    reference.current!.focus()})
             } else {
+                console.log("something we do here")
                 reference.current.focus()  
             }
         }
-    }, [focusButtonIndex, dropState, entryField, goDownPlease])
+    }, [focusButtonIndex, dropState, inputValue, goDownPlease])
 
     useEffect(() => { //if no options in checkList() the popup closes. Likewise, it stays closed if entryField is empty. 
        if ( checkList().length == 0) {
-        setTempState({...currentState, dropState: true})
-       } else if (entryField !== "") {
-        setTempState({...currentState, dropState: false})
+        setTempState({...currentState, dropState: "1"})
+       } else if (inputValue !== "") {
+        setTempState({...currentState, dropState: "0"})
        }
-    }, [entryField])
+    }, [inputValue])
 
     //const randomCode = () => {
         return(
@@ -185,7 +202,7 @@ export function Dropdown({listOfOptions, theState}){
             <input type="text"
             id = "input" 
             placeholder={currentOption} 
-            value = {entryField} 
+            value = {inputValue} 
             style = {{width: "70%",
                       height: "100%",
                       fontSize: "14px",
@@ -214,7 +231,7 @@ export function Dropdown({listOfOptions, theState}){
             
             </div>
 
-                { dropState 
+                { dropState == "1"
                     ?
                     null
                     :
@@ -233,7 +250,7 @@ export function Dropdown({listOfOptions, theState}){
                                     id = {key}
                                     style = {{width: "100%", borderRadius: "0px", }} 
                                     value = {searched_option}
-                                    onClick = {() => { setTempState({...currentState, dropState: true, currentOption: searched_option}); setEntryField("")}} >
+                                    onClick = {() => { setTempState({...currentState, dropState: "1", currentOption: searched_option, inputValue: ""});}} >
                                     {searched_option} </button>
                             )}
                             </div>

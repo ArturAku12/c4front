@@ -9,8 +9,8 @@ const App = () => {
     const listOfOptions: string[] = ["Mary", "John", "Alex", "Marie", "Jonathan", "Babel", "Hanna", "Joseph", "Ivan", "Gregory", "Ioseph", "Papadopoulos"]
     const key = "TEST";
     const identity = {parent:"test"}
-    const state = {inputValue: "", currentOption: "", dropState: "true"}
-    const child1 = $(Dropdown, {listOfOptions: listOfOptions, theState: state})
+    const state = {inputValue: "", currentOption: "", dropState: "1"}
+    const child1 = $(Dropdown, {listOfOptions: listOfOptions, theState: state, identity: {parent: "test"},})
     const sender = {
             enqueue: (identity: any, patch: any) => console.log()
     };
