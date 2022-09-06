@@ -750,19 +750,77 @@ div.grid {
       flex-grow: 1;
       display: flex;
       justify-content: center;
-      align-items: center;
-      border-right: 1px solid var(--color-dark-grayColor);
-      overflow: hidden;
-      padding: 0 0.4em;
+      //background-color: var(--color-dark-redColor);
 
-      &.routePartDone {
-          //background-color: var(--color-dark-primaryColor);
-          background-color: var(--color-light-greenColor);
-          color: var(--textColor-dark-primaryColor);
+      &.firstDoneContinue {
+        background-color: var(--color-dark-primaryColor);
+        color: var(--textColor-dark-primaryColor);
+        border-radius: 1em 0 0 1em;
       }
-      
-      &.isLastDone, &:last-child {
-          border-radius: 0 1em 1em 0;
+
+      &.firstDoneStop {
+        background-color: var(--color-grayColor);
+        border-radius: 1em 0 0 1em;
+      }
+
+      &.doneContinue {
+        background-color: var(--color-dark-primaryColor);
+        color: var(--textColor-dark-primaryColor);
+      }
+
+      &.doneStop{
+        background-color: var(--color-grayColor);
+      }
+
+      &.doneLast{
+        background-color: var(--color-grayColor);
+        border-radius: 0 1em 1em 0;
+      }
+
+      &.notDoneContinue{
+        background-color: var(--color-grayColor);
+      }
+
+      &.notDoneStop{
+        border-radius: 1em 1em 1em 1em;
+      }
+
+      > div {
+        flex-grow: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        //border-right: 1px solid var(--textColor-dark-redColor);
+        overflow: hidden;
+        padding: 0 1em;
+
+
+        &.routePartDone {
+            background-color: var(--color-dark-primaryColor);
+            color: var(--textColor-dark-primaryColor);
+            border-radius: 0.4em 1em 1em 0.4em;
+            border-right: 1px solid var(--textColor-dark-redColor);
+        }
+
+        &.isLastDone {
+          background-color: var(--color-dark-primaryColor);
+          border-radius: 0em 1em 1em 0em;
+        }
+
+        &.notDone {
+          background-color: var(--color-grayColor);
+          border-radius: 0em 1em 1em 0em;
+          border-right: 1px solid var(--textColor-dark-redColor);
+        }
+
+        &.last {
+          border-radius: 0 0.4em 0.4em 0;
+        }
+
+        &.first {
+          border-radius: 0.4em 1em 1em 0.4em;
+          border-left: 1px solid var(--textColor-dark-redColor)
+        }
       }
   }
 }
