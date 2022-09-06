@@ -250,7 +250,9 @@ export function Dropdown({listOfOptions, theState, identity}: DropdownProps){
                                     id = {key}
                                     style = {{width: "100%", borderRadius: "0px", }} 
                                     value = {searched_option}
-                                    onClick = {() => { setTempState({...currentState, dropState: "1", currentOption: searched_option, inputValue: ""});}} >
+                                    onClick = {() => { setTempState({...currentState, dropState: "1", currentOption: searched_option, inputValue: ""});}}
+                                    onMouseOver = {(event) => { if(reference.current !== event.target) {reference.current.style.backgroundColor = "white"}}}
+                                    onMouseLeave = {(event) => { reference.current.style.backgroundColor = "#149688"}}>
                                     {searched_option} </button>
                             )}
                             </div>
