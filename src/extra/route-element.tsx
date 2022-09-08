@@ -21,7 +21,6 @@ interface RouteElementProps {
             {routeParts.map((part, ind) => {
                 const { text, hint, done, onClick } = part;
                 const isLastDone = ind === lastDone;
-                console.log(routeParts)
                 return (
                         <div key={`${ind}`}
                             className={clsx(
