@@ -744,88 +744,42 @@ div.grid {
   color: var(--textColor-grayColor);
   border-radius: 0.58em;
   margin: 5em;
-  max-width: 500px;;
+  max-width: 500px;
+  overflow: hidden;
 
-  > div {
+    > div {
       flex-grow: 1;
       display: flex;
       justify-content: center;
-      color: var(--textColor-dark-primaryColor);
-      //background-color: var(--color-dark-redColor);
+      align-items: center;
+      overflow: hidden;
+      padding: 0 1em;
 
-      // &.firstDoneContinue {
-      //   background-color: var(--color-dark-primaryColor);
-      //   //border-radius: 1em 0 0 1em;
-      // }
-
-      // &.firstDoneStop {
-      //   background-color: var(--color-grayColor);
-      //   border-radius: 1em 0 0 1em;
-      // }
-
-      // &.doneContinue {
-      //   background-color: var(--color-dark-primaryColor);
-      // }
-
-      // &.doneStop{
-      //   background-color: var(--color-grayColor);
-      // }
-
-      // &.doneLast{
-      //   background-color: var(--color-grayColor);
-      //   border-radius: 0 1em 1em 0;
-      // }
-
-      // &.notDoneContinue{
-      //   background-color: var(--color-grayColor);
-      // }
-
-      // &.notDoneStop{
-      //   border-radius: 1em 1em 1em 1em;
-      // }
-
-      &.continue{
+      &.routePartDone {
         background-color: var(--color-dark-primaryColor);
+        border-right: 1px solid var(--color-dark-grayColor);
+        border-radius: 0em 0.58em 0.58em 0;
+        &.continue {
+            box-shadow: 8px 0px 0px 0px #009688;
+        }
+      }
+        
+      &.notDone {
+        background-color: var(--color-grayColor);
+        border-right: 1px solid var(--color-dark-grayColor);
+        border-radius: 0em 0.58em 0.58em 0;
       }
 
       &.stop{
-        background-color: var(--color-grayColor)
+        border-top-right-radius: 0.58em;
+        border-bottom-right-radius: 0.58em;
+        border-right: 1px solid var(--color-dark-grayColor);
       }
 
-      &.start{
-        border-radius: 0.58em 0em 0em 0.58em;
-      }
-
-      &.end{
-        border-radius: 0em 0.58em 0.58em 0em;
-      }
-      > div {
-        flex-grow: 1;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        overflow: hidden;
-        padding: 0 1em;
-        border-radius: 0em 0.58em 0.58em 0em;
-
-        &.routePartDone {
-            background-color: var(--color-dark-primaryColor);
-            border-right: 1px solid var(--color-dark-grayColor);
-        }
-
-        &.notDone {
-          background-color: var(--color-grayColor);
-          border-right: 1px solid var(--color-dark-grayColor);
-        }
-
-        &.last {
-          border-radius: 0 0.58em 0.58em 0;
-        }
-
-        &.first {
-          border-radius: 0.58em 0.58em 0.58em 0.58em;
-          border-left: 1px solid var(--color-dark-grayColor)
-        }
+      &.first {
+        border-top-left-radius: 0.58em;
+        border-bottom-left-radius: 0.58em;
+        border-left: 1px solid var(--color-dark-grayColor)
       }
   }
 }
